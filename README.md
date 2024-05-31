@@ -10,7 +10,7 @@ A single player, and pass &amp; play chess game for iOS mobile devices. Whether 
 - [ ] Implement different levels for AI
 - [ ] Implement functionality to start with black against AI
 - [ ] Implement functionality to rotate board after each turn with a switch for the users to choose that option
-- [ ] Change board theme highlights and board theme colors to make it look better
+- [x] Change board theme highlights and board theme colors to make it look better
 - [x] Detect draw conditions such as repetition (3X) and insufficient material (eg. king v king, minor piece and king vs king)
 - [ ] Add piece moves on top of the board for users to be able to copy and paste their moves and check it in an engine
 - [ ] Implement functionality for users to set time (bullet, blitz, rapid)
