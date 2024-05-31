@@ -1,5 +1,5 @@
 # Chess-iOS
-A single player, and pass &amp; play chess game for iOS mobile devices
+A single player, and pass &amp; play chess game for iOS mobile devices. Whether you're a chess enthusiast or a casual player, this app provides an excellent platform to play and improve your chess skills. The app supports both single-player mode against an AI opponent and pass & play mode to enjoy chess with friends on the same device. Feel free to fork and submit pull requests to improve the app!
 
 ## To-Do List
 - [ ] Label (A-H, 1-8) colors should be different for odd and even tiles. It should also differ based on the board theme chosen
