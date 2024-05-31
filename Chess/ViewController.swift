@@ -86,40 +86,7 @@ extension ViewController: BoardViewDelegate {
                 return
             }
             if wasPromoted {
-                let alert = UIAlertController(
-                    title: "Promote Pawn",
-                    message: nil,
-                    preferredStyle: .alert
-                )
-                let playerColor = currentGame.player == .white ? "black" : "white"
-                let pieceImages: [Piece: String] = [
-                    .queen: "Queen-\(playerColor)",
-                    .rook: "Rook-\(playerColor)",
-                    .bishop: "Bishop-\(playerColor)",
-                    .knight: "Knight-\(playerColor)"
-                ]
-                
-                for piece in [Piece.queen, .rook, .bishop, .knight] {
-                    guard let imageName = pieceImages[piece],
-                          let pieceImage = UIImage(named: imageName) else {
-                        continue
-                    }
-                    let action = UIAlertAction(
-                        title: "",
-                        style: .default,
-                        handler: { [weak self] _ in
-                            guard let self = self else { return }
-                            self.currentGame.promote(atPosition: move.destination, chosenPromotedPiece: piece)
-                            boardView.chessBoard = self.currentGame.chessBoard
-                            self.handleGameStatusChange()
-                        }
-                    )
-                    action.setValue(pieceImage.withRenderingMode(.alwaysOriginal), forKey: "image")
-                    action.accessibilityLabel = "\(piece.rawValue.capitalized)"
-                    alert.addAction(action)
-                }
-                
-                self.present(alert, animated: true)
+                showPromotionAlert(at: move.destination, playerColor: self.currentGame.player == .white ? "black" : "white")
                 return
             }
             self.handleGameStatusChange()
@@ -165,13 +132,71 @@ extension ViewController: BoardViewDelegate {
                 }))
                 present(alert, animated: true)
             case .staleMate:
-                let alert = UIAlertController(
-                    title: "Game Over",
-                    message: "Stalemate: Nobody wins",
-                    preferredStyle: .alert
-                )
-                alert.addAction(UIAlertAction(title: "OK", style: .default))
+                let alert = UIAlertController(title: "Game Over",message: "Stalemate: Nobody wins", preferredStyle: .alert)
+                alert.addAction(UIAlertAction(title: "Look At Final Position", style: .default))
+                alert.addAction(UIAlertAction(title: "Back to Home Screen", style: UIAlertAction.Style.default, handler: {
+                    action in self.performSegue(withIdentifier: "GameBackButton", sender: self)
+                }))
+                alert.addAction(UIAlertAction(title: "Rematch", style: UIAlertAction.Style.default, handler: {
+                    action in
+                    self.currentGame = Game()
+                    UIView.animate(withDuration: 0.3, animations: {
+                        self.boardView?.chessBoard = self.currentGame.chessBoard
+                    }, completion: { [weak self] _ in
+                        self?.handleGameStatusChange()
+                    })
+                    self.handlePieceSelection(nil)
+                }))
                 present(alert, animated: true)
         }
+    }
+    
+    private func showPromotionAlert(at position: ChessPiecePosition, playerColor: String) {
+        let alert = UIAlertController(title: "Promote Pawn", message: nil, preferredStyle: .alert)
+
+        let pieceImages: [Piece: String] = [
+            .queen: "Queen-\(playerColor)",
+            .rook: "Rook-\(playerColor)",
+            .bishop: "Bishop-\(playerColor)",
+            .knight: "Knight-\(playerColor)"
+        ]
+
+        var column = 0
+        var row = 0
+        let maxColumns = 2
+        let imageWidth = 50
+        let imageHeight = 50
+
+        for piece in [Piece.queen, .rook, .bishop, .knight] {
+            guard let imageName = pieceImages[piece], let pieceImage = UIImage(named: imageName) else {
+                continue
+            }
+
+            let resizedImage = pieceImage.resized(to: CGSize(width: imageWidth, height: imageHeight))
+            let action = UIAlertAction(title: piece.rawValue.capitalized, style: .default) { [weak self] _ in
+                guard let self = self else { return }
+                self.currentGame.promote(atPosition: position, chosenPromotedPiece: piece)
+                self.boardView?.chessBoard = self.currentGame.chessBoard
+                self.handleGameStatusChange()
+            }
+            action.setValue(resizedImage.withRenderingMode(.alwaysOriginal), forKey: "image")
+            alert.addAction(action)
+            column += 1
+            if column == maxColumns {
+                column = 0
+                row += 1
+            }
+        }
+
+        present(alert, animated: true)
+    }
+}
+
+extension UIImage {
+    func resized(to size: CGSize) -> UIImage {
+        UIGraphicsBeginImageContextWithOptions(size, false, 0.0)
+        defer { UIGraphicsEndImageContext() }
+        draw(in: CGRect(origin: .zero, size: size))
+        return UIGraphicsGetImageFromCurrentImageContext() ?? self
     }
 }

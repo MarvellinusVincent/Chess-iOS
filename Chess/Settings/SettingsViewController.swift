@@ -25,8 +25,8 @@ class SettingsViewController: UIViewController {
     
     @IBOutlet weak var originalBoardTheme: UIButton!
     @IBOutlet weak var chessComBoardTheme: UIButton!
-    @IBOutlet weak var blackWhiteBoardTheme: UIButton!
-    @IBOutlet weak var grayscaleBoardTheme: UIButton!
+    @IBOutlet weak var lightBoardTheme: UIButton!
+    @IBOutlet weak var glassBoardTheme: UIButton!
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -43,7 +43,7 @@ class SettingsViewController: UIViewController {
     }
     
     private func setupThemeButtons() {
-        themeButtons = [originalBoardTheme, chessComBoardTheme, grayscaleBoardTheme, blackWhiteBoardTheme]
+        themeButtons = [originalBoardTheme, chessComBoardTheme, glassBoardTheme, lightBoardTheme]
         for button in themeButtons {
             button.addTarget(self, action: #selector(themeButtonTapped(_:)), for: .touchUpInside)
         }

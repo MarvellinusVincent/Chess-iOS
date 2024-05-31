@@ -37,6 +37,9 @@ struct Game {
         if check(for: player) {
             return movable ? .check : .checkMate
         }
+        if additionalStalemateCheck() {
+            return .staleMate
+        }
         return movable ? .ongoing : .staleMate
     }
     
@@ -300,4 +303,20 @@ struct Game {
         return false
     }
     
+    // Additional Game Logic
+    
+    func additionalStalemateCheck() -> Bool {
+        let allPieces = chessBoard.allChessBoardPieces.map { $0.piece }
+        let totalPiecesCount = allPieces.count
+        if totalPiecesCount == 2 {
+            return true
+        }
+        let whitePieces = allPieces.filter { $0.color == .white }
+        let blackPieces = allPieces.filter { $0.color == .black }
+        let whiteNonKingPieces = whitePieces.filter { $0.pieceType != .king }
+        let blackNonKingPieces = blackPieces.filter { $0.pieceType != .king }
+        let whiteMinorPieces = whiteNonKingPieces.count == 1 && (whiteNonKingPieces.first?.pieceType == .knight || whiteNonKingPieces.first?.pieceType == .bishop)
+        let blackMinorPieces = blackNonKingPieces.count == 1 && (blackNonKingPieces.first?.pieceType == .knight || blackNonKingPieces.first?.pieceType == .bishop)
+        return whiteMinorPieces && totalPiecesCount == 3 || blackMinorPieces && totalPiecesCount == 3
+    }
 }

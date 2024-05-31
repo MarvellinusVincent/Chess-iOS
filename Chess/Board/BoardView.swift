@@ -54,7 +54,7 @@ class BoardView: UIView {
                     let label = UILabel()
                     label.text = "\(8 - i)"
                     label.font = UIFont.systemFont(ofSize: 11)
-                    label.textColor = .black
+                    label.textColor = labelColor(for: theme, isEvenSquare: (i + j) % 2 == 0)
                     label.sizeToFit()
                     numberLabels.append(label)
                     view.addSubview(label)
@@ -64,7 +64,7 @@ class BoardView: UIView {
                     let label = UILabel()
                     label.text = "\(Character(UnicodeScalar(97 + j)!))"
                     label.font = UIFont.systemFont(ofSize: 11)
-                    label.textColor = .black
+                    label.textColor = labelColor(for: theme, isEvenSquare: (i + j) % 2 == 0)
                     label.sizeToFit()
                     letterLabels.append(label)
                     view.addSubview(label)
@@ -110,17 +110,29 @@ class BoardView: UIView {
     }
     
     private func highlightPiece() {
+        let highlightColors: (even: UIColor, odd: UIColor)
+        switch theme {
+        case .original:
+            highlightColors = HighlightTheme.original.highlightColor
+        case .chesscom:
+            highlightColors = HighlightTheme.chesscom.highlightColor
+        case .glass:
+            highlightColors = HighlightTheme.glass.highlightColor
+        case .light:
+            highlightColors = HighlightTheme.light.highlightColor
+        }
         for (i, row) in chessBoard.pieces.enumerated() {
             for (j, piece) in row.enumerated() {
                 guard let piece = piece, let view = chessPieces[piece.id] else {
                     continue
                 }
                 let isSelected = pieceSelected == ChessPiecePosition(x: j, y: i)
+                let isEvenSquare = (i + j) % 2 == 0
 
                 if isSelected {
-                    squares[i * 8 + j].backgroundColor = highlightColor
+                    squares[i * 8 + j].backgroundColor = isEvenSquare ? highlightColors.even : highlightColors.odd
                 } else {
-                    squares[i * 8 + j].backgroundColor = UIColor(named: (i + j) % 2 == 0 ? theme.squareColor.odd : theme.squareColor.even)
+                    squares[i * 8 + j].backgroundColor = UIColor(named: isEvenSquare ? theme.squareColor.odd : theme.squareColor.even)
                 }
                 view.alpha = pieceSelected == ChessPiecePosition(x: j, y: i) ? 1 : 1
             }
@@ -137,26 +149,20 @@ class BoardView: UIView {
         didSet { updateBoardTheme() }
     }
     
-    private var highlightColor: UIColor {
+    
+    private func labelColor(for theme: BoardTheme, isEvenSquare: Bool) -> UIColor {
+        let labelColors: (even: UIColor, odd: UIColor)
         switch theme {
         case .original:
-            return HighlightTheme.original.highlightColor
+            labelColors = labelTheme.original.labelColor
         case .chesscom:
-            return HighlightTheme.chesscom.highlightColor
-        case .grayscale:
-            return HighlightTheme.grayscale.highlightColor
-        case .blackWhite:
-            return HighlightTheme.blackWhite.highlightColor
+            labelColors = labelTheme.chesscom.labelColor
+        case .glass:
+            labelColors = labelTheme.glass.labelColor
+        case .light:
+            labelColors = labelTheme.light.labelColor
         }
-    }
-    
-    private func labelColor(for theme: BoardTheme) -> UIColor {
-        switch theme {
-        case .original, .chesscom, .grayscale:
-            return .black
-        case .blackWhite:
-            return .red
-        }
+        return isEvenSquare ? labelColors.even : labelColors.odd
     }
     
     private var squareSize: CGSize {
@@ -200,19 +206,18 @@ class BoardView: UIView {
         squares.removeAll()
         for i in 0 ..< 8 {
             for j in 0 ..< 8 {
-                let isWhiteSquare = i % 2 == j % 2
+                let isEvenSquare = (i + j) % 2 == 0
                 let view = UIView()
-                view.backgroundColor = UIColor(named: isWhiteSquare ? theme.squareColor.odd : theme.squareColor.even)
+                view.backgroundColor = UIColor(named: isEvenSquare ? theme.squareColor.even : theme.squareColor.odd)
                 squares.append(view)
                 insertSubview(view, at: 0)
             }
         }
-        let labelColor = self.labelColor(for: theme)
-        for label in numberLabels {
-            label.textColor = labelColor
+        for (index, label) in numberLabels.enumerated() {
+            label.textColor = labelColor(for: theme, isEvenSquare: index % 2 == 0)
         }
-        for label in letterLabels {
-            label.textColor = labelColor
+        for (index, label) in letterLabels.enumerated() {
+            label.textColor = labelColor(for: theme, isEvenSquare: index % 2 == 0)
         }
     }
     
