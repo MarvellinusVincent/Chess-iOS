@@ -16,7 +16,8 @@ enum Status {
 
 struct Game {
     var chessBoard: ChessBoard
-    private var moveHistory: [Move]
+    var moveHistory: [Move]
+    var moveHistoryView: MoveHistory?
     
     init() {
         chessBoard = ChessBoard()
@@ -106,6 +107,8 @@ struct Game {
     
     mutating func movePiece(source: ChessPiecePosition, destination: ChessPiecePosition) {
         guard isValidMove(start: source, target: destination) else { return }
+        let originPieceType = chessBoard.indexOfPiece(atPosition: source)?.pieceType.rawValue ?? ""
+        let destinationPieceType = chessBoard.indexOfPiece(atPosition: destination)?.pieceType.rawValue ?? ""
         if let piece = chessBoard.indexOfPiece(atPosition: source) {
             switch piece.pieceType {
             case .pawn:
@@ -125,6 +128,7 @@ struct Game {
         }
         chessBoard.movePiece(source: source, destination: destination)
         moveHistory.append(Move(origin: source, destination: destination))
+        moveHistoryView?.update(with: Move(origin: source, destination: destination), originPiece: originPieceType, destinationPiece: destinationPieceType)
     }
     
     // AI Logic

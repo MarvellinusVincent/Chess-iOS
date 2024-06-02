@@ -21,7 +21,7 @@ class BoardView: UIView {
     private var numberLabels: [UILabel] = []
     private var letterLabels: [UILabel] = []
     private var chessPieces: [String: UIImageView] = [:]
-    
+
     var chessBoard = ChessBoard() {
         didSet { displayPiece() }
     }
@@ -30,10 +30,9 @@ class BoardView: UIView {
         didSet { highlightPiece() }
     }
     
-//    Depends on the switch if its on
-//    var availableLegalMoves: [ChessPiecePosition] = [] {
-//        didSet { updateLegalMoves() }
-//    }
+    var availableLegalMoves: [ChessPiecePosition] = [] {
+        didSet { updateLegalMoves() }
+    }
 
     private func configureView() {
         for i in 0 ..< 8 {
@@ -43,12 +42,6 @@ class BoardView: UIView {
                 view.backgroundColor = UIColor(named: isWhiteSquare ? theme.squareColor.odd : theme.squareColor.even)
                 squares.append(view)
                 addSubview(view)
-//    Depends on the switch if its on
-//                let legalMoveView = UIView()
-//                legalMoveView.backgroundColor = .white
-//                legalMoveView.frame = boundingBox(x: j, y: i, boxSize: squareSize)
-//                legalMoves.append(legalMoveView)
-//                addSubview(legalMoveView)
 
                 if j == 0 {
                     let label = UILabel()
@@ -69,6 +62,16 @@ class BoardView: UIView {
                     letterLabels.append(label)
                     view.addSubview(label)
                 }
+                
+                if AppSettings.shared.showLegalMoves == false {
+                    continue
+                }
+                
+                let legalMoveView = UIView()
+                legalMoveView.backgroundColor = .white
+                legalMoveView.frame = boundingBox(x: j, y: i, boxSize: squareSize)
+                legalMoves.append(legalMoveView)
+                addSubview(legalMoveView)
             }
         }
 
@@ -110,6 +113,9 @@ class BoardView: UIView {
     }
     
     private func highlightPiece() {
+        guard let delegate = delegate as? ViewController, delegate.highlightMoves else {
+            return
+        }
         let highlightColors: (even: UIColor, odd: UIColor)
         switch theme {
         case .original:
@@ -195,8 +201,7 @@ class BoardView: UIView {
             }
         }
         displayPiece()
-        //    Depends on the switch if its on
-        //        updateLegalMoves()
+        updateLegalMoves()
     }
     
     private func updateBoardTheme() {
@@ -221,21 +226,31 @@ class BoardView: UIView {
         }
     }
     
-//    Depends on the switch if its on
-//    private func updateLegalMoves() {
-//        let size = squareSize
-//        for i in 0 ..< 8 {
-//            for j in 0 ..< 8 {
-//                let position = ChessPiecePosition(x: j, y: i)
-//                let view = legalMoves[i * 8 + j]
-//                view.frame = boundingBox(x: j, y: i, boxSize: size)
-//                view.layer.cornerRadius = size.width / 2
-//                view.layer.transform = CATransform3DMakeScale(0.25, 0.25, 0)
+    private func updateLegalMoves() {
+        if AppSettings.shared.showLegalMoves == false {
+            return
+        }
+        let size = squareSize
+        for i in 0 ..< 8 {
+            for j in 0 ..< 8 {
+                let position = ChessPiecePosition(x: j, y: i)
+                guard let view = legalMoves[safe: i * 8 + j] else {
+                    continue
+                }
+                view.frame = boundingBox(x: j, y: i, boxSize: size)
+                view.layer.cornerRadius = size.width / 2
+                view.layer.transform = CATransform3DMakeScale(0.3, 0.3, 0)
 //                view.backgroundColor = // depends on the board theme
-//                view.alpha = availableLegalMoves.contains(position) ? 1 : 0
-//            }
-//        }
-//    }
+                view.alpha = availableLegalMoves.contains(position) ? 1 : 0
+                let hasPiece = chessBoard.pieces[i][j] != nil
+                if hasPiece {
+                    bringSubviewToFront(view)
+                } else {
+                    bringSubviewToFront(view)
+                }
+            }
+        }
+    }
     
     @objc private func didTap(_ gesture: UITapGestureRecognizer) {
         let location = gesture.location(in: self)
@@ -254,3 +269,10 @@ class BoardView: UIView {
         configureView()
     }
 }
+
+extension Array {
+    subscript(safe index: Index) -> Element? {
+        return indices.contains(index) ? self[index] : nil
+    }
+}
+

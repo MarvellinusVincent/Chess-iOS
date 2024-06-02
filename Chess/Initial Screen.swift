@@ -11,9 +11,7 @@ import UIKit
 class InitialScreen: UIViewController {
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
         if let destinationVC = segue.destination as? ViewController {
-            if segue.identifier == "SinglePlayer" {
-                destinationVC.singlePlayer = true
-            } else if segue.identifier == "Pass&Play" {
+            if segue.identifier == "Pass&Play" {
                 destinationVC.singlePlayer = false
             }
         }

@@ -6,33 +6,54 @@
 //
 
 import UIKit
+import AVFoundation
 
 class ViewController: UIViewController {
     
+    @IBOutlet weak var moveHistoryView: MoveHistory!
     @IBOutlet var boardView: BoardView?
-    private var currentGame = Game()
+    var currentGame = Game()
     var singlePlayer : Bool!
     var undo: Bool!
     var highlightMoves: Bool!
     var showLegalMoves: Bool!
     var sound: Bool!
+    var regularMove: AVAudioPlayer!
+    var captureMove: AVAudioPlayer!
+    var againstAIColor: String!
+    var difficultyLevel: String!
     
     override func viewDidLoad() {
         super.viewDidLoad()
         boardView?.delegate = self
-        handleGameStatusChange()
-        undo = {
-            return AppSettings.shared.undo
-        }()
-        highlightMoves = {
-            return AppSettings.shared.highlightMoves
-        }()
-        showLegalMoves = {
-            return AppSettings.shared.showLegalMoves
-        }()
-        sound = {
-            return AppSettings.shared.soundEnabled
-        }()
+        handleGameSettings()
+        loadAudioFiles()
+        currentGame.moveHistoryView = moveHistoryView
+        print(againstAIColor)
+        print(difficultyLevel)
+    }
+    
+    private func handleGameSettings() {
+        undo = AppSettings.shared.undo
+        highlightMoves = AppSettings.shared.highlightMoves
+        showLegalMoves = AppSettings.shared.showLegalMoves
+        sound = AppSettings.shared.soundEnabled
+    }
+    
+    private func loadAudioFiles() {
+        DispatchQueue.global().async {
+            if let regularUrl = Bundle.main.url(forResource: "RegularMove", withExtension: "mp3"),
+               let captureUrl = Bundle.main.url(forResource: "Capture", withExtension: "mp3") {
+                do {
+                    self.regularMove = try AVAudioPlayer(contentsOf: regularUrl)
+                    self.captureMove = try AVAudioPlayer(contentsOf: captureUrl)
+                    self.regularMove.prepareToPlay()
+                    self.captureMove.prepareToPlay()
+                } catch {
+                    print("Error loading audio files: \(error)")
+                }
+            }
+        }
     }
     
     override var supportedInterfaceOrientations: UIInterfaceOrientationMask {
@@ -41,6 +62,7 @@ class ViewController: UIViewController {
 }
 
 extension ViewController: BoardViewDelegate {
+    
     func boardView(_ boardView: BoardView, tap position: ChessPiecePosition) {
         guard let selection = boardView.pieceSelected else {
             if currentGame.playerTurn(at: position) {
@@ -64,6 +86,15 @@ extension ViewController: BoardViewDelegate {
             return
         }
         let oldGame = currentGame
+        if sound {
+            let isCapture = currentGame.chessBoard.indexOfPiece(atPosition: move.destination) != nil
+            if isCapture {
+                captureMove.play()
+            } else {
+                regularMove.play()
+            }
+        }
+        
         currentGame.movePiece(source: move.origin, destination: move.destination)
         let board1 = currentGame.chessBoard
         let kingPosition = currentGame.king(for: oldGame.player)
@@ -74,11 +105,11 @@ extension ViewController: BoardViewDelegate {
             return
         }
         let board2 = currentGame.chessBoard
+        
         UIView.animate(withDuration: 0.25, animations: {
             boardView.pieceSelected = nil
             boardView.chessBoard = board1
-            // Depends on the switch if legal moves is on
-//            boardView.availableLegalMoves = []
+            boardView.availableLegalMoves = []
         }, completion: { [weak self] _ in
             guard let self = self, board2 == self.currentGame.chessBoard else { return }
             if wasInCheck {
@@ -100,12 +131,11 @@ extension ViewController: BoardViewDelegate {
         }
     }
     
-//      Depends on the switch if legal moves is on
     private func handlePieceSelection(_ position: ChessPiecePosition?) {
-//        let moves = position.map(currentGame.movesForPiece(at:)) ?? []
+        let moves = position.map(currentGame.movesForPiece(at:)) ?? []
         UIView.animate(withDuration: 0, animations: {
             self.boardView?.pieceSelected = position
-//            self.boardView?.availableLegalMoves = moves
+            self.boardView?.availableLegalMoves = moves
         })
     }
     

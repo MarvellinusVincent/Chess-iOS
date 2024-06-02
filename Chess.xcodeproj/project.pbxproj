@@ -23,6 +23,10 @@
 		5671A5622C04685100944ACC /* Piece.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5671A5612C04685100944ACC /* Piece.swift */; };
 		5671A5642C04686600944ACC /* PieceColor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5671A5632C04686600944ACC /* PieceColor.swift */; };
 		5671A5662C04688800944ACC /* BoardTheme.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5671A5652C04688800944ACC /* BoardTheme.swift */; };
+		56828D502C0BF46100D6DB90 /* SinglePlayerController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 56828D4F2C0BF46100D6DB90 /* SinglePlayerController.swift */; };
+		56828D572C0C198200D6DB90 /* Capture.mp3 in Resources */ = {isa = PBXBuildFile; fileRef = 56828D562C0C198200D6DB90 /* Capture.mp3 */; };
+		56828D592C0C198600D6DB90 /* RegularMove.mp3 in Resources */ = {isa = PBXBuildFile; fileRef = 56828D582C0C198600D6DB90 /* RegularMove.mp3 */; };
+		56A1EAF62C0AE30500C96C15 /* MoveHistory.swift in Sources */ = {isa = PBXBuildFile; fileRef = 56A1EAF52C0AE30500C96C15 /* MoveHistory.swift */; };
 		56ADE5332C08648700BDB615 /* ChessPiecePosition.swift in Sources */ = {isa = PBXBuildFile; fileRef = 56ADE5322C08648700BDB615 /* ChessPiecePosition.swift */; };
 		56ADE5352C0864A100BDB615 /* Offset.swift in Sources */ = {isa = PBXBuildFile; fileRef = 56ADE5342C0864A100BDB615 /* Offset.swift */; };
 		56C3BA2B2C0827E200D59C20 /* Initial Screen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 56C3BA2A2C0827E200D59C20 /* Initial Screen.swift */; };
@@ -67,6 +71,10 @@
 		5671A5612C04685100944ACC /* Piece.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Piece.swift; sourceTree = "<group>"; };
 		5671A5632C04686600944ACC /* PieceColor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PieceColor.swift; sourceTree = "<group>"; };
 		5671A5652C04688800944ACC /* BoardTheme.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BoardTheme.swift; sourceTree = "<group>"; };
+		56828D4F2C0BF46100D6DB90 /* SinglePlayerController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SinglePlayerController.swift; sourceTree = "<group>"; };
+		56828D562C0C198200D6DB90 /* Capture.mp3 */ = {isa = PBXFileReference; lastKnownFileType = audio.mp3; path = Capture.mp3; sourceTree = "<group>"; };
+		56828D582C0C198600D6DB90 /* RegularMove.mp3 */ = {isa = PBXFileReference; lastKnownFileType = audio.mp3; path = RegularMove.mp3; sourceTree = "<group>"; };
+		56A1EAF52C0AE30500C96C15 /* MoveHistory.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MoveHistory.swift; sourceTree = "<group>"; };
 		56ADE5322C08648700BDB615 /* ChessPiecePosition.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChessPiecePosition.swift; sourceTree = "<group>"; };
 		56ADE5342C0864A100BDB615 /* Offset.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Offset.swift; sourceTree = "<group>"; };
 		56C3BA2A2C0827E200D59C20 /* Initial Screen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Initial Screen.swift"; sourceTree = "<group>"; };
@@ -130,8 +138,11 @@
 				5671A52D2C04614D00944ACC /* ViewController.swift */,
 				560B52102C05C990009BEFCA /* Game.swift */,
 				56C3BA2A2C0827E200D59C20 /* Initial Screen.swift */,
+				56828D532C0C192900D6DB90 /* Sound */,
 				5671A5372C04614E00944ACC /* Info.plist */,
 				5671A5322C04614E00944ACC /* Assets.xcassets */,
+				56A1EAF52C0AE30500C96C15 /* MoveHistory.swift */,
+				56828D4F2C0BF46100D6DB90 /* SinglePlayerController.swift */,
 			);
 			path = Chess;
 			sourceTree = "<group>";
@@ -151,6 +162,15 @@
 				5671A54C2C04614E00944ACC /* ChessUITestsLaunchTests.swift */,
 			);
 			path = ChessUITests;
+			sourceTree = "<group>";
+		};
+		56828D532C0C192900D6DB90 /* Sound */ = {
+			isa = PBXGroup;
+			children = (
+				56828D582C0C198600D6DB90 /* RegularMove.mp3 */,
+				56828D562C0C198200D6DB90 /* Capture.mp3 */,
+			);
+			path = Sound;
 			sourceTree = "<group>";
 		};
 		56ADE52C2C085E0C00BDB615 /* Settings */ = {
@@ -313,8 +333,10 @@
 			buildActionMask = 2147483647;
 			files = (
 				5671A5332C04614E00944ACC /* Assets.xcassets in Resources */,
+				56828D572C0C198200D6DB90 /* Capture.mp3 in Resources */,
 				5671A5362C04614E00944ACC /* Base in Resources */,
 				5671A5312C04614D00944ACC /* Base in Resources */,
+				56828D592C0C198600D6DB90 /* RegularMove.mp3 in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -340,6 +362,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				5671A5662C04688800944ACC /* BoardTheme.swift in Sources */,
+				56828D502C0BF46100D6DB90 /* SinglePlayerController.swift in Sources */,
 				56C3BA2B2C0827E200D59C20 /* Initial Screen.swift in Sources */,
 				56ADE5352C0864A100BDB615 /* Offset.swift in Sources */,
 				5671A52E2C04614D00944ACC /* ViewController.swift in Sources */,
@@ -351,6 +374,7 @@
 				5671A55A2C04629700944ACC /* Board.swift in Sources */,
 				56ADE5332C08648700BDB615 /* ChessPiecePosition.swift in Sources */,
 				5602775E2C08378D00A5DDB8 /* SettingsViewController.swift in Sources */,
+				56A1EAF62C0AE30500C96C15 /* MoveHistory.swift in Sources */,
 				56EB36272C057117005B58BA /* Settings.swift in Sources */,
 				5671A52C2C04614D00944ACC /* SceneDelegate.swift in Sources */,
 			);
