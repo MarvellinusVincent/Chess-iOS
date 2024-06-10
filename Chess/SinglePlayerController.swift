@@ -85,7 +85,11 @@ class SinglePlayerController: UIViewController {
         if segue.identifier == "playSinglePlayer" {
             if let destinationVC = segue.destination as? ViewController {
                 destinationVC.singlePlayer = true
-                destinationVC.againstAIColor = self.playerColor ?? whiteColor
+                if let playerColor = self.playerColor {
+                    destinationVC.againstAIColor = (playerColor == whiteColor) ? blackColor : whiteColor
+                } else {
+                    destinationVC.againstAIColor = blackColor
+                }
                 destinationVC.difficultyLevel = self.difficultyLevel ?? easyLevel
             }
         }

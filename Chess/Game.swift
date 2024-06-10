@@ -18,6 +18,7 @@ struct Game {
     var chessBoard: ChessBoard
     var moveHistory: [Move]
     var moveHistoryView: MoveHistory?
+    var previousStates: [GameState] = []
     
     init() {
         chessBoard = ChessBoard()
@@ -42,6 +43,11 @@ struct Game {
             return .staleMate
         }
         return movable ? .ongoing : .staleMate
+    }
+    
+    mutating func saveCurrentState() {
+        let state = GameState(chessBoard: chessBoard, moveHistory: moveHistory)
+        previousStates.append(state)
     }
     
     func isValidMove(start: ChessPiecePosition, target: ChessPiecePosition) -> Bool {
@@ -106,6 +112,7 @@ struct Game {
     }
     
     mutating func movePiece(source: ChessPiecePosition, destination: ChessPiecePosition) {
+        saveCurrentState()
         guard isValidMove(start: source, target: destination) else { return }
         let originPieceType = chessBoard.indexOfPiece(atPosition: source)?.pieceType.rawValue ?? ""
         let destinationPieceType = chessBoard.indexOfPiece(atPosition: destination)?.pieceType.rawValue ?? ""
@@ -133,8 +140,171 @@ struct Game {
     
     // AI Logic
     
-    func AI(for color: PieceColor) -> Move? {
-        return Move(origin: ChessPiecePosition(x: 0, y: 0), destination: ChessPiecePosition(x: 0, y: 1))
+    func AI(for color: PieceColor, difficulty: String) -> Move? {
+        let deadline = Date().addingTimeInterval(5)
+        var bestMove: Move?
+        var bestScore = Int.min
+        while Date() < deadline {
+            for piecePosition in chessBoard.allPositions {
+                guard let piece = chessBoard.indexOfPiece(atPosition: piecePosition), piece.color == color else {
+                    continue
+                }
+                
+                let possibleMoves = possibleMoves(for: piecePosition)
+                
+                for move in possibleMoves {
+                    var newGame = self
+                    newGame.movePiece(source: piecePosition, destination: move.destination)
+                    
+                    let score: Int
+                    switch difficulty {
+                    case "easy":
+                        score = minimax(board: newGame, depth: 1, maximizingPlayer: false, color: color)
+                    case "medium":
+                        score = minimax(board: newGame, depth: 2, maximizingPlayer: false, color: color)
+                    case "hard":
+                        score = minimax(board: newGame, depth: 3, maximizingPlayer: false, color: color)
+                    default:
+                        score = minimax(board: newGame, depth: 1, maximizingPlayer: false, color: color)
+                    }
+                    
+                    if score > bestScore {
+                        bestMove = move
+                        bestScore = score
+                    }
+                }
+            }
+        }
+        
+        return bestMove
+    }
+
+    func minimax(board: Game, depth: Int, maximizingPlayer: Bool, color: PieceColor) -> Int {
+        if depth == 0 {
+            return evaluatePosition(board: board, color: color)
+        }
+        
+        if maximizingPlayer {
+            var maxScore = Int.min
+            let possibleMoves = board.possibleMoves(for: color)
+            for move in possibleMoves {
+                var newBoard = board
+                newBoard.movePiece(source: move.origin, destination: move.destination)
+                let score = minimax(board: newBoard, depth: depth - 1, maximizingPlayer: false, color: color)
+                maxScore = max(maxScore, score)
+            }
+            return maxScore
+        } else {
+            var minScore = Int.max
+            let possibleMoves = board.possibleMoves(for: color.opponentColor)
+            for move in possibleMoves {
+                var newBoard = board
+                newBoard.movePiece(source: move.origin, destination: move.destination)
+                let score = minimax(board: newBoard, depth: depth - 1, maximizingPlayer: true, color: color)
+                minScore = min(minScore, score)
+            }
+            return minScore
+        }
+    }
+
+    func evaluatePosition(board: Game, color: PieceColor) -> Int {
+        let spaceControlScore = calculateSpaceControl(for: color)
+        let pawnStructureScore = calculatePawnStructure(for: color)
+        let pieceActivityScore = calculatePieceActivity(for: color, board: board)
+        
+        var pieceValues = 0
+        for row in board.chessBoard.pieces {
+            for piece in row {
+                if let piece = piece {
+                    let value = piece.pieceType.value
+                    pieceValues += (piece.color == color ? value : -value)
+                }
+            }
+        }
+        
+        let pieceValuesWeighted = Double(pieceValues) * 0.6
+        let spaceControlWeighted = Double(spaceControlScore) * 0.05
+        let pawnStructureWeighted = Double(pawnStructureScore) * 0.1
+        let pieceActivityWeighted = Double(pieceActivityScore) * 0.25
+        
+        let totalScore = pieceValuesWeighted + spaceControlWeighted + pawnStructureWeighted + pieceActivityWeighted
+        
+        return Int(totalScore)
+    }
+    
+    func calculatePieceActivity(for color: PieceColor, board: Game) -> Int {
+        var activityScore = 0
+        for row in 0..<8 {
+            for col in 0..<8 {
+                if let piece = board.chessBoard.pieces[row][col], piece.color == color {
+                    let position = ChessPiecePosition(x: col, y: row)
+                    let legalMoves = board.availableMoves(for: position)
+                    activityScore += legalMoves.count
+                    for move in legalMoves {
+                        if (move.x >= 2 && move.x <= 5) && (move.y >= 2 && move.y <= 5) {
+                            activityScore += 1
+                        }
+                        if (color == .white && move.y <= 3) || (color == .black && move.y >= 4) {
+                            activityScore += 1
+                        }
+                    }
+                }
+            }
+        }
+        return activityScore
+    }
+    
+    func calculateSpaceControl(for color: PieceColor) -> Int {
+        var spaceControlScore = 0
+        let squareWeights: [[Int]] = [
+            [1, 1, 1, 1, 1, 1, 1, 1],
+            [1, 2, 2, 2, 2, 2, 2, 1],
+            [1, 2, 3, 3, 3, 3, 2, 1],
+            [1, 2, 3, 4, 4, 3, 2, 1],
+            [1, 2, 3, 4, 4, 3, 2, 1],
+            [1, 2, 3, 3, 3, 3, 2, 1],
+            [1, 2, 2, 2, 2, 2, 2, 1],
+            [1, 1, 1, 1, 1, 1, 1, 1]
+        ]
+        
+        for row in 0..<8 {
+            for col in 0..<8 {
+                if let piece = chessBoard.pieces[row][col], piece.color == color {
+                    spaceControlScore += squareWeights[row][col]
+                }
+            }
+        }
+        return spaceControlScore
+    }
+    
+    func calculatePawnStructure(for color: PieceColor) -> Int {
+        var pawnStructureScore = 0
+        
+        let pawns = chessBoard.allChessBoardPieces.filter { _, piece in
+            piece.color == color && piece.pieceType == .pawn
+        }
+        
+        for (position, _) in pawns {
+            let adjacentPawns = countAdjacentPawns(at: position, for: color)
+            pawnStructureScore += adjacentPawns
+        }
+        
+        return pawnStructureScore
+    }
+    
+    func countAdjacentPawns(at position: ChessPiecePosition, for color: PieceColor) -> Int {
+        var adjacentPawns = 0
+        
+        for offset in [Offset(x: 1, y: 0), Offset(x: -1, y: 0)] {
+            let adjacentPosition = position + offset
+            if chessBoard.allPositions.contains(adjacentPosition),
+               let piece = chessBoard.indexOfPiece(atPosition: adjacentPosition),
+               piece.color == color && piece.pieceType == .pawn {
+                adjacentPawns += 1
+            }
+        }
+        
+        return adjacentPawns
     }
     
     // Pawn helper functions
@@ -323,4 +493,21 @@ struct Game {
         let blackMinorPieces = blackNonKingPieces.count == 1 && (blackNonKingPieces.first?.pieceType == .knight || blackNonKingPieces.first?.pieceType == .bishop)
         return whiteMinorPieces && totalPiecesCount == 3 || blackMinorPieces && totalPiecesCount == 3
     }
+}
+
+extension Game {
+    mutating func undoLastMove() {
+        guard !previousStates.isEmpty else {
+            return
+        }
+        let lastState = previousStates.removeLast()
+        self.chessBoard = lastState.chessBoard
+        self.moveHistory = lastState.moveHistory
+        self.moveHistoryView?.removeLastMove()
+    }
+}
+
+struct GameState {
+    var chessBoard: ChessBoard
+    var moveHistory: [Move]
 }

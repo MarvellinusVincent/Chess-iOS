@@ -129,20 +129,20 @@
 		5671A5282C04614D00944ACC /* Chess */ = {
 			isa = PBXGroup;
 			children = (
-				56ADE5312C08647B00BDB615 /* Position */,
-				56ADE5302C085E4E00BDB615 /* Delegate */,
-				56ADE52F2C085E4300BDB615 /* Storyboard */,
-				56ADE52E2C085E3600BDB615 /* Piece */,
-				56ADE52D2C085E2500BDB615 /* Board */,
-				56ADE52C2C085E0C00BDB615 /* Settings */,
-				5671A52D2C04614D00944ACC /* ViewController.swift */,
+				5671A5372C04614E00944ACC /* Info.plist */,
 				560B52102C05C990009BEFCA /* Game.swift */,
 				56C3BA2A2C0827E200D59C20 /* Initial Screen.swift */,
-				56828D532C0C192900D6DB90 /* Sound */,
-				5671A5372C04614E00944ACC /* Info.plist */,
-				5671A5322C04614E00944ACC /* Assets.xcassets */,
 				56A1EAF52C0AE30500C96C15 /* MoveHistory.swift */,
 				56828D4F2C0BF46100D6DB90 /* SinglePlayerController.swift */,
+				5671A52D2C04614D00944ACC /* ViewController.swift */,
+				5671A5322C04614E00944ACC /* Assets.xcassets */,
+				56ADE52D2C085E2500BDB615 /* Board */,
+				56ADE5302C085E4E00BDB615 /* Delegate */,
+				56ADE52E2C085E3600BDB615 /* Piece */,
+				56ADE5312C08647B00BDB615 /* Position */,
+				56ADE52C2C085E0C00BDB615 /* Settings */,
+				56828D532C0C192900D6DB90 /* Sound */,
+				56ADE52F2C085E4300BDB615 /* Storyboard */,
 			);
 			path = Chess;
 			sourceTree = "<group>";
@@ -167,8 +167,8 @@
 		56828D532C0C192900D6DB90 /* Sound */ = {
 			isa = PBXGroup;
 			children = (
-				56828D582C0C198600D6DB90 /* RegularMove.mp3 */,
 				56828D562C0C198200D6DB90 /* Capture.mp3 */,
+				56828D582C0C198600D6DB90 /* RegularMove.mp3 */,
 			);
 			path = Sound;
 			sourceTree = "<group>";

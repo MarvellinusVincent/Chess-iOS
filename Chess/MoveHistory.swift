@@ -121,7 +121,6 @@ class MoveHistory: UICollectionView, UICollectionViewDataSource, UICollectionVie
             let moveTuple = moveHistory[indexPath.item]
             let moveText = "\(moveTuple.1)"
 
-            // Calculate the size required for the move notation text.
             let size = CGSize(width: CGFloat.greatestFiniteMagnitude, height: frame.height)
             let options = NSStringDrawingOptions.usesFontLeading.union(.usesLineFragmentOrigin)
             let estimatedRect = NSString(string: moveText).boundingRect(with: size, options: options, attributes: [NSAttributedString.Key.font: UIFont.systemFont(ofSize: 16)], context: nil)
@@ -129,6 +128,22 @@ class MoveHistory: UICollectionView, UICollectionViewDataSource, UICollectionVie
 
             return CGSize(width: width, height: frame.height)
         }
+    
+    func removeLastMove() {
+        guard !moveHistory.isEmpty else { return }
+        moveHistory.removeLast()
+        
+        if moveHistory.count % 2 == 1 {
+            turnNumber -= 1
+        }
+        
+        reloadData()
+        
+        if !moveHistory.isEmpty {
+            let lastIndexPath = IndexPath(item: moveHistory.count - 1, section: 0)
+            scrollToItem(at: lastIndexPath, at: .right, animated: true)
+        }
+    }
 }
 
 

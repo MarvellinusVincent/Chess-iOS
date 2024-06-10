@@ -12,6 +12,8 @@ class ViewController: UIViewController {
     
     @IBOutlet weak var moveHistoryView: MoveHistory!
     @IBOutlet var boardView: BoardView?
+    @IBOutlet weak var resignButton: UIButton!
+    @IBOutlet weak var undoButton: UIButton!
     var currentGame = Game()
     var singlePlayer : Bool!
     var undo: Bool!
@@ -29,8 +31,8 @@ class ViewController: UIViewController {
         handleGameSettings()
         loadAudioFiles()
         currentGame.moveHistoryView = moveHistoryView
-        print(againstAIColor)
-        print(difficultyLevel)
+        resignButton.addTarget(self, action: #selector(handleResignButtonTapped), for: .touchUpInside)
+        undoButton.addTarget(self, action: #selector(handleUndoButtonTapped), for: .touchUpInside)
     }
     
     private func handleGameSettings() {
@@ -54,6 +56,34 @@ class ViewController: UIViewController {
                 }
             }
         }
+    }
+    
+    @objc private func handleResignButtonTapped() {
+        let alert = UIAlertController(title: "Game Over", message: "\(currentGame.player.opponentColor.rawValue.capitalized) wins by resignation", preferredStyle: .alert)
+        alert.addAction(UIAlertAction(title: "Look At Final Position", style: .default))
+        alert.addAction(UIAlertAction(title: "Back to Home Screen", style: .default, handler: { _ in
+            self.performSegue(withIdentifier: "GameBackButton", sender: self)
+        }))
+        alert.addAction(UIAlertAction(title: "Rematch", style: .default, handler: { _ in
+            self.currentGame = Game()
+            UIView.animate(withDuration: 0.3, animations: {
+                self.boardView?.chessBoard = self.currentGame.chessBoard
+            }, completion: { [weak self] _ in
+                self?.handleGameStatusChange()
+            })
+            self.handlePieceSelection(nil)
+        }))
+        present(alert, animated: true)
+    }
+    
+    @objc private func handleUndoButtonTapped() {
+        print("here")
+        currentGame.undoLastMove()
+        UIView.animate(withDuration: 0.3, animations: {
+            self.boardView?.chessBoard = self.currentGame.chessBoard
+        }, completion: { [weak self] _ in
+            self?.handleGameStatusChange()
+        })
     }
     
     override var supportedInterfaceOrientations: UIInterfaceOrientationMask {
@@ -125,9 +155,16 @@ extension ViewController: BoardViewDelegate {
     }
     
     private func AIMove() {
-        if singlePlayer {
-            guard let move = currentGame.AI(for: currentGame.player) else { return }
-            makeMove(move)
+        if singlePlayer && againstAIColor == "black" {
+            if currentGame.player == .black, let move = currentGame.AI(for: currentGame.player, difficulty: difficultyLevel) {
+                makeMove(move)
+            }
+        } else if singlePlayer && againstAIColor == "white" {
+            if currentGame.moveHistory.isEmpty, let move = currentGame.AI(for: .white, difficulty: difficultyLevel) {
+                makeMove(move)
+            } else if currentGame.player == .white, let move = currentGame.AI(for: currentGame.player, difficulty: difficultyLevel) {
+                makeMove(move)
+            }
         }
     }
     
